@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections;
 
+[DisallowMultipleComponent]
 [ExecuteInEditMode]
 public class SortingGroup : MonoBehaviour
 {
