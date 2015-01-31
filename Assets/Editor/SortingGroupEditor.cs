@@ -10,7 +10,6 @@ namespace UnityEditor
 	{
 		ReorderableList list;
 		SerializedProperty sortingLayerID;
-		SerializedProperty groupOrder;
 		protected static MethodInfo meth_SortingLayerField;
 
 		static Vector2 scrollArea;
@@ -25,7 +24,6 @@ namespace UnityEditor
 				true, false, false, false);
 
 			sortingLayerID = serializedObject.FindProperty("sortingLayerID");
-			groupOrder = serializedObject.FindProperty ("groupOrder");
 
 			// Get SortingLayerField method
 			var editorTypes = typeof(Editor).Assembly.GetTypes();		
@@ -54,8 +52,6 @@ namespace UnityEditor
 					so.ApplyModifiedProperties();
 				}
 			}
-
-			EditorGUILayout.PropertyField (groupOrder);
 			serializedObject.ApplyModifiedProperties();
 		}
 
