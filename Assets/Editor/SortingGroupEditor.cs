@@ -10,6 +10,8 @@ namespace UnityEditor
 	{
 		ReorderableList list;
 		SerializedProperty sortingLayerID;
+		SerializedProperty useIsometricSorting;
+
 		protected static MethodInfo meth_SortingLayerField;
 
 		static Vector2 scrollArea;
@@ -24,6 +26,7 @@ namespace UnityEditor
 				true, false, false, false);
 
 			sortingLayerID = serializedObject.FindProperty("sortingLayerID");
+			useIsometricSorting = serializedObject.FindProperty("useIsometricSorting");
 
 			// Get SortingLayerField method
 			var editorTypes = typeof(Editor).Assembly.GetTypes();		
@@ -52,6 +55,7 @@ namespace UnityEditor
 					so.ApplyModifiedProperties();
 				}
 			}
+			EditorGUILayout.PropertyField(useIsometricSorting, new GUIContent("Isometric Sorting"));
 			serializedObject.ApplyModifiedProperties();
 		}
 

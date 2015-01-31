@@ -14,8 +14,12 @@ public class SortingGroup : MonoBehaviour
 		public Renderer renderer;
 		public SortingGroup sortingGroup;
 	}
+
 	public List<RendererInfo> rendererInfos = new List<RendererInfo> ();
 	public int sortingLayerID;
+
+	public bool useIsometricSorting;
+	public Vector3 isometricScale;
 
 	void Reset()
 	{
@@ -141,13 +145,27 @@ public class SortingGroup : MonoBehaviour
 
 	void SetRenderingOrder(SortingGroup sortingGroup, ref int orderIndex)
 	{
+		if (sortingGroup.useIsometricSorting)
+		{
+			sortingGroup.rendererInfos.Sort(
+
+				delegate (RendererInfo a, RendererInfo b)
+				{
+					var x = a.renderer ? a.renderer.transform : a.sortingGroup.transform;
+					var y = b.renderer ? b.renderer.transform : b.sortingGroup.transform;
+
+					return x.position.y.CompareTo(y.position.y);
+				}
+				);
+		}
+
 		foreach (var rendererInfo in sortingGroup.rendererInfos)
 		{
 			if (rendererInfo.renderer)
 				rendererInfo.renderer.sortingOrder = orderIndex--;
 
 			if (rendererInfo.sortingGroup != null)
-				SetRenderingOrder (rendererInfo.sortingGroup, ref orderIndex);
+				SetRenderingOrder(rendererInfo.sortingGroup, ref orderIndex);
 		}
 	}
 }
