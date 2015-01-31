@@ -15,7 +15,6 @@ public class SortingGroup : MonoBehaviour
 	}
 	public List<RendererInfo> rendererInfos = new List<RendererInfo> ();
 	public int sortingLayerID;
-	public int groupOrder;
 
 	void Reset()
 	{
