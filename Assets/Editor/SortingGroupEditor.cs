@@ -39,9 +39,9 @@ namespace UnityEditor
 
 			serializedObject.Update();
 
-			scrollArea = GUILayout.BeginScrollView (scrollArea);
+			//scrollArea = GUILayout.BeginScrollView (scrollArea);
 			list.DoLayoutList();
-			GUILayout.EndScrollView();
+			//GUILayout.EndScrollView();
 
 			EditorGUI.BeginChangeCheck();
 			SortingLayerField (new GUIContent("Sorting Layer"), sortingLayerID, EditorStyles.popup);

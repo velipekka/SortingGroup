@@ -103,16 +103,51 @@ public class SortingGroup : MonoBehaviour
 		return GetClosestComponentFromParent<T>(transform.parent, includeSelf);
 	}
 
+	T GetClosestToRootComponent <T>(Transform transform) where T : Component
+	{
+		T result = null;
+		if (transform.parent)
+			result = GetClosestToRootComponent<T>(transform.parent);
+
+		if (result == null)
+			result = transform.GetComponent<T> ();
+
+		return result;
+	}
+
 	void Update()
 	{
-		int index = rendererInfos.Count;
-		foreach (var renderer in rendererInfos)
-		{
-			if (renderer.renderer)
-				renderer.renderer.sortingOrder = index--;
+		var rootGroup = GetClosestToRootComponent<SortingGroup> (transform) as SortingGroup;
 
-			if (renderer.sortingGroup)
-				renderer.sortingGroup.groupOrder = index--;
+		if (rootGroup != this)
+			return;
+		
+		int orderIndex = GetRendererCount(rootGroup);
+		SetRenderingOrder (rootGroup, ref orderIndex);
+	}
+
+	int GetRendererCount(SortingGroup sortingGroup)
+	{
+		int count = sortingGroup.rendererInfos.Count;
+
+		foreach (var rendererInfo in sortingGroup.rendererInfos)
+		{
+			if (rendererInfo.sortingGroup != null)
+				count += GetRendererCount(rendererInfo.sortingGroup);
+		}
+
+		return count;
+	}
+
+	void SetRenderingOrder(SortingGroup sortingGroup, ref int orderIndex)
+	{
+		foreach (var rendererInfo in sortingGroup.rendererInfos)
+		{
+			if (rendererInfo.renderer)
+				rendererInfo.renderer.sortingOrder = orderIndex--;
+
+			if (rendererInfo.sortingGroup != null)
+				SetRenderingOrder (rendererInfo.sortingGroup, ref orderIndex);
 		}
 	}
 }
