@@ -15,6 +15,9 @@ public class SortingGroup : MonoBehaviour
 		public SortingGroup sortingGroup;
 	}
 
+	public enum SortingMode { Manual, Hierarchy, Isometric }
+	public SortingMode sortingMode;
+
 	public List<RendererInfo> rendererInfos = new List<RendererInfo> ();
 	public int sortingLayerID;
 
@@ -24,6 +27,12 @@ public class SortingGroup : MonoBehaviour
 	void Reset()
 	{
 		Refresh();
+		var rootGroup = GetClosestToRootComponent<SortingGroup> (transform) as SortingGroup;
+
+		if (rootGroup != this)
+			return;
+
+		SortHierarchy (rootGroup);
 	}
 
 	bool Contains(Renderer renderer, SortingGroup sortingGroup)
@@ -145,18 +154,15 @@ public class SortingGroup : MonoBehaviour
 
 	void SetRenderingOrder(SortingGroup sortingGroup, ref int orderIndex)
 	{
-		if (sortingGroup.useIsometricSorting)
+		switch (sortingGroup.sortingMode)
 		{
-			sortingGroup.rendererInfos.Sort(
+			case SortingMode.Isometric:
+				SortIsometric (sortingGroup);
+				break;
 
-				delegate (RendererInfo a, RendererInfo b)
-				{
-					var x = a.renderer ? a.renderer.transform : a.sortingGroup.transform;
-					var y = b.renderer ? b.renderer.transform : b.sortingGroup.transform;
-
-					return x.position.y.CompareTo(y.position.y);
-				}
-				);
+			case SortingMode.Hierarchy:
+				SortHierarchy (sortingGroup);
+				break;
 		}
 
 		foreach (var rendererInfo in sortingGroup.rendererInfos)
@@ -167,5 +173,45 @@ public class SortingGroup : MonoBehaviour
 			if (rendererInfo.sortingGroup != null)
 				SetRenderingOrder(rendererInfo.sortingGroup, ref orderIndex);
 		}
+	}
+
+	void SortHierarchy(SortingGroup sortingGroup)
+	{
+		sortingGroup.rendererInfos.Sort(
+			delegate(RendererInfo a, RendererInfo b)
+			{
+				var x = a.renderer ? a.renderer.transform : a.sortingGroup.transform;
+				var y = b.renderer ? b.renderer.transform : b.sortingGroup.transform;
+
+				return HierarchyCompare (x, y);
+			}
+			);
+	}
+
+	int HierarchyCompare(Transform a, Transform b)
+	{
+		return GetHierarhyIndex(a) < GetHierarhyIndex(b) ? 1 : -1;
+	}
+
+	int GetHierarhyIndex (Transform transform, int orderIndex = 0)
+	{
+		if (transform == this.transform)
+			return orderIndex;
+
+		orderIndex += transform.GetSiblingIndex ();
+		return GetHierarhyIndex(transform.parent, orderIndex);
+	}
+
+	static void SortIsometric (SortingGroup sortingGroup)
+	{
+		sortingGroup.rendererInfos.Sort(
+			delegate(RendererInfo a, RendererInfo b)
+			{
+				var x = a.renderer ? a.renderer.transform : a.sortingGroup.transform;
+				var y = b.renderer ? b.renderer.transform : b.sortingGroup.transform;
+
+				return x.position.y.CompareTo(y.position.y);
+			}
+			);
 	}
 }

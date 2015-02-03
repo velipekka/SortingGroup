@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using System.Reflection;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 using UnityEditorInternal;
+using UnityEngine.Events;
 
 namespace UnityEditor
 {
@@ -10,7 +12,8 @@ namespace UnityEditor
 	{
 		ReorderableList list;
 		SerializedProperty sortingLayerID;
-		SerializedProperty useIsometricSorting;
+		SerializedProperty sortingMode;
+		AnimatedValues.AnimBool showManualMode;
 
 		protected static MethodInfo meth_SortingLayerField;
 
@@ -26,7 +29,11 @@ namespace UnityEditor
 				true, false, false, false);
 
 			sortingLayerID = serializedObject.FindProperty("sortingLayerID");
-			useIsometricSorting = serializedObject.FindProperty("useIsometricSorting");
+			sortingMode = serializedObject.FindProperty("sortingMode");
+
+			showManualMode = new AnimBool(sortingMode.intValue == 0);
+			showManualMode.valueChanged = new UnityEvent ();
+			showManualMode.valueChanged.AddListener(Repaint);
 
 			// Get SortingLayerField method
 			var editorTypes = typeof(Editor).Assembly.GetTypes();		
@@ -40,9 +47,14 @@ namespace UnityEditor
 
 			serializedObject.Update();
 
-			//scrollArea = GUILayout.BeginScrollView (scrollArea);
-			list.DoLayoutList();
-			//GUILayout.EndScrollView();
+			EditorGUILayout.PropertyField (sortingMode);
+
+			var mode = (SortingGroup.SortingMode)sortingMode.intValue;
+			showManualMode.target = mode == SortingGroup.SortingMode.Manual;
+
+			if (EditorGUILayout.BeginFadeGroup (showManualMode.faded))
+				list.DoLayoutList();
+			EditorGUILayout.EndFadeGroup ();
 
 			EditorGUI.BeginChangeCheck();
 			SortingLayerField (new GUIContent("Sorting Layer"), sortingLayerID, EditorStyles.popup);
@@ -55,7 +67,6 @@ namespace UnityEditor
 					so.ApplyModifiedProperties();
 				}
 			}
-			EditorGUILayout.PropertyField(useIsometricSorting, new GUIContent("Isometric Sorting"));
 			serializedObject.ApplyModifiedProperties();
 		}
 
