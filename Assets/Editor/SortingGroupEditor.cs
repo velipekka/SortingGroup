@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace UnityEditor
 			// Get SortingLayerField method
 			var editorTypes = typeof(Editor).Assembly.GetTypes();		
 			var type = editorTypes.FirstOrDefault(t => t.Name == "EditorGUILayout");
-			meth_SortingLayerField = type.GetMethod("SortingLayerField",(BindingFlags.Static | BindingFlags.NonPublic));
+			meth_SortingLayerField = type.GetMethod("SortingLayerField",(BindingFlags.Static | BindingFlags.NonPublic), null, new Type[] {typeof(GUIContent), typeof(SerializedProperty) , typeof(GUIStyle)}, null);
 		}
 
 		public override void OnInspectorGUI()
