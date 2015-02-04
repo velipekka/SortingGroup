@@ -39,12 +39,6 @@ public class SortingGroup : MonoBehaviour
 	{
 		foreach (var rendererInfo in rendererInfos)
 		{
-			if (rendererInfo.renderer == null && rendererInfo.sortingGroup == null)
-			{
-				rendererInfos.Remove(rendererInfo);
-				continue;
-			}
-
 			if (renderer != null && rendererInfo.renderer == renderer)
 				return true;
 
@@ -57,6 +51,9 @@ public class SortingGroup : MonoBehaviour
 	public void Refresh ()
 	{
 		var renderers = GetRenderersInChildren();
+
+		// Clean Destroyed objects
+		rendererInfos.RemoveAll (item => item.renderer == null && item.sortingGroup == null);
 
 		// Newly added renderers
 		foreach (var renderer in renderers)
@@ -168,10 +165,15 @@ public class SortingGroup : MonoBehaviour
 		foreach (var rendererInfo in sortingGroup.rendererInfos)
 		{
 			if (rendererInfo.renderer)
+			{
+				rendererInfo.renderer.sortingLayerID = sortingLayerID;
 				rendererInfo.renderer.sortingOrder = orderIndex--;
+			}
 
 			if (rendererInfo.sortingGroup != null)
-				SetRenderingOrder(rendererInfo.sortingGroup, ref orderIndex);
+			{
+				SetRenderingOrder (rendererInfo.sortingGroup, ref orderIndex);
+			}
 		}
 	}
 
